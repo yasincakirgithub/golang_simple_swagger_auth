@@ -1,0 +1,78 @@
+definitions:
+  models.userSignUp:
+    properties:
+      email:
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        maxLength: 50
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Yasin Çakır
+    url: https://www.linkedin.com/in/yasincakir26/
+  title: Simple JWT Auth API With Gin Framework
+  version: "1.0"
+paths:
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Login for users
+      tags:
+      - users
+  /users/logout:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Logout for users
+      tags:
+      - users
+  /users/signup:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.userSignUp'
+      summary: SignUp for users
+      tags:
+      - users
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  JwtAuth(http, Bearer):
+    in: header
+    name: JWT Authorization
+    type: apiKey
+swagger: "2.0"
