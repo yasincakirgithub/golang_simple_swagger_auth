@@ -18,7 +18,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/users/login": {
+        "/users/auth": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -29,19 +29,35 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Login for users",
+                "summary": "Auth for users",
+                "parameters": [
+                    {
+                        "description": "User Auth",
+                        "name": "auth",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AuthInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.TokenResponse"
                         }
                     }
                 }
             }
         },
-        "/users/logout": {
-            "post": {
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -51,18 +67,18 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Logout for users",
+                "summary": "User Detail",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 }
             }
         },
-        "/users/signup": {
+        "/users/register": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -73,12 +89,23 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "SignUp for users",
+                "summary": "Register for users",
+                "parameters": [
+                    {
+                        "description": "User Register",
+                        "name": "register",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.RegisterInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.userSignUp"
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 }
@@ -86,40 +113,79 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.userSignUp": {
+        "models.AuthInput": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RegisterInput": {
             "type": "object",
             "required": [
                 "email",
-                "name",
-                "password"
+                "password",
+                "username"
             ],
             "properties": {
                 "email": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer",
-                    "example": 1
+                "password": {
+                    "type": "string"
                 },
-                "name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 2
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TokenResponse": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "password": {
-                    "type": "string",
-                    "minLength": 6
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
-        },
-        "JwtAuth(http, Bearer)": {
+        "BearerAuth": {
             "type": "apiKey",
-            "name": "JWT Authorization",
+            "name": "Authorization",
             "in": "header"
         }
     }
@@ -128,7 +194,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "127.0.0.1:8080",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Simple JWT Auth API With Gin Framework",

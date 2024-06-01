@@ -1,24 +1,50 @@
 definitions:
-  models.userSignUp:
+  models.AuthInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  models.RegisterInput:
     properties:
       email:
         type: string
-      id:
-        example: 1
-        type: integer
-      name:
-        maxLength: 50
-        minLength: 2
-        type: string
       password:
-        minLength: 6
+        type: string
+      username:
         type: string
     required:
     - email
-    - name
     - password
+    - username
     type: object
-host: localhost:8080
+  models.TokenResponse:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+host: 127.0.0.1:8080
 info:
   contact:
     name: Yasin Çakır
@@ -26,22 +52,29 @@ info:
   title: Simple JWT Auth API With Gin Framework
   version: "1.0"
 paths:
-  /users/login:
+  /users/auth:
     post:
       consumes:
       - application/json
+      parameters:
+      - description: User Auth
+        in: body
+        name: auth
+        required: true
+        schema:
+          $ref: '#/definitions/models.AuthInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: Login for users
+            $ref: '#/definitions/models.TokenResponse'
+      summary: Auth for users
       tags:
       - users
-  /users/logout:
-    post:
+  /users/me:
+    get:
       consumes:
       - application/json
       produces:
@@ -50,29 +83,36 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
-      summary: Logout for users
+            $ref: '#/definitions/models.User'
+      security:
+      - BearerAuth: []
+      summary: User Detail
       tags:
       - users
-  /users/signup:
+  /users/register:
     post:
       consumes:
       - application/json
+      parameters:
+      - description: User Register
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.userSignUp'
-      summary: SignUp for users
+            $ref: '#/definitions/models.User'
+      summary: Register for users
       tags:
       - users
 securityDefinitions:
-  BasicAuth:
-    type: basic
-  JwtAuth(http, Bearer):
+  BearerAuth:
     in: header
-    name: JWT Authorization
+    name: Authorization
     type: apiKey
 swagger: "2.0"

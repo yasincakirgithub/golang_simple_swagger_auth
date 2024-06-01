@@ -1,39 +1,50 @@
 package main
 
 import (
+	"GOLANG/api/initializers"
 	r "GOLANG/api/router"
-	"GOLANG/config"
 	docs "GOLANG/docs"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
+	cors "github.com/rs/cors/wrapper/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func init() {
-	config.LoadEnvVariables()
-	config.ConnectToDb()
-	config.SyncDatabase()
+	initializers.LoadEnvVariables()
+	initializers.ConnectToDb()
+	initializers.SyncDatabase()
 }
 
 // @title           Simple JWT Auth API With Gin Framework
 // @version         1.0
 // @contact.name   Yasin Çakır
 // @contact.url    https://www.linkedin.com/in/yasincakir26/
-// @host      localhost:8080
-// @securityDefinitions.basic  BasicAuth
-// @securityDefinitions.apikey JwtAuth(http, Bearer)
+// @host      127.0.0.1:8080
+// @securityDefinitions.apikey BearerAuth
 // @in header
-// @name JWT Authorization
+// @name Authorization
 func main() {
 
 	// Gin Framework
 	router := gin.Default()
+
+	// Cors Settings
+	corsConfig := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Origin", "Content-Type"},
+		AllowCredentials: true,
+	})
+
+	router.Use(corsConfig)
 	docs.SwaggerInfo.BasePath = "/api"
 
 	r.GetRoute(router)
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	router.Run(":8080")
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	router.Run(":" + os.Getenv("PORT"))
 
 }
